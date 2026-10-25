@@ -1,32 +1,17 @@
 {
-  "name": "Çalışma saatleri",
-  "short_name": "Çalışma saatleri",
-  "description": "Vardiyanı gir – doğrudan Google tablona",
+  "name": "Zeiterfassung",
+  "short_name": "Zeiterfassung",
+  "description": "Schicht eintragen – direkt in deine Google-Tabelle",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F3F5F8",
   "theme_color": "#1F4E78",
-  "lang": "tr",
+  "lang": "de",
   "icons": [
-    {
-      "src": "../icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "../icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "../icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

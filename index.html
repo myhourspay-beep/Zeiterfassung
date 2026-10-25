@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="de">
 <head>
-<title>Çalışma saatleri</title>
+<title>Zeiterfassung</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#1F4E78">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Çalışma saatleri">
+<meta name="apple-mobile-web-app-title" content="Zeiterfassung">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="../icon-180.png">
-<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <style>
@@ -138,7 +138,7 @@
 
 <script>
 // ---- TEXTE (Sprache) ----
-var L = {"locale": "tr-TR", "heute": "Bugün", "gestern": "Dün", "morgen": "Yarın", "zurueckHeute": "↺ Bugüne dön", "schicht": "Vardiya", "U": "İzin", "K": "Hastalık", "leeren": "Boş gün", "zeiten": "Süreler", "ann": "Erken gelme", "annU": "Devir alma", "abg": "Geç çıkma", "abgU": "Devir teslim", "versp": "Gecikme", "verspU": "geç geldi", "ueber": "Fazla mesai", "ueberU": "ek çalışma", "min": "dk", "std": "ödenen saat", "brutto": "brüt", "bruttoHeute": "bugün brüt", "leer": "Boş gün – vardiya yok.", "gespeichert": "✓ kaydedildi", "schichtGesp": "✓ {x} kaydedildi", "schichtName": "{k} vardiyası", "geloescht": "✓ Boş gün kaydedildi", "vortag": "Önceki gün", "folgetag": "Sonraki gün", "weniger": "az", "mehr": "çok", "speichern": "Kaydet", "gespeichertKnopf": "✓ Kaydedildi", "speichertKnopf": "Kaydediliyor …", "verwerfen": "Değişiklikleri geri al", "ungespeichert": "Önce kaydet veya geri al.", "berechnet": "Hesaplanıyor …", "laden": "Yükleniyor …", "monat": "📅 Aylık özet", "zurTag": "‹ Güne dön", "bruttoM": "brüt", "netto": "Net (tahmini)", "arbeitstage": "İş günleri", "urlaubT": "İzin", "krankT": "Hastalık", "stdGesamt": "Toplam saat", "stdAus": "bunun ödenen kısmı", "zNacht": "Gece zammı", "zSonntag": "Pazar zammı", "zFeiertag": "Resmî tatil zammı", "zUK": "İzin/hastalık zammı", "azkMonat": "Saat hesabı bu ay", "azkGesamt": "Saat hesabı toplam", "std_": "sa", "einst": "⚙ Bağlantıyı değiştir", "keineVerb": "Tabloya bağlantı yok.", "nichtGespVerb": "Kaydedilmedi – bağlantı yok. Lütfen tekrar „Kaydet“e bas.", "serverFehler": "Sunucu yanıt vermiyor", "eTitel": "Kurulum", "eText": "Bir kez: Tablonda üstteki „📱 Mobil uygulama“ menüsünden „② Uygulamayı bağla“yı seç ve QR kodunu telefonla tara. Ya da bağlantıyı ve anahtarı buraya yapıştır.", "eUrl": "Uygulama bağlantısı (/exec ile biter)", "eK": "Anahtar", "eKPh": "uzun kod", "eOk": "Kaydet ve bağlan", "eWarn": "Anahtarı kimseyle paylaşma – anahtarı olan tablona yazabilir.", "eUrlFehler": "Bağlantı https://script.google.com ile başlamalı ve /exec ile bitmeli.", "eKFehler": "Anahtar çok kısa."};
+var L = {"locale": "de-DE", "heute": "Heute", "gestern": "Gestern", "morgen": "Morgen", "zurueckHeute": "↺ Zurück zu heute", "schicht": "Schicht", "U": "Urlaub", "K": "Krank", "leeren": "Frei", "zeiten": "Zeiten", "ann": "Früher kommen", "annU": "Übergabe-Annahme", "abg": "Länger bleiben", "abgU": "Übergabe-Abgabe", "versp": "Verspätung", "verspU": "kam später", "ueber": "Überstunden", "ueberU": "zusätzlich gearbeitet", "min": "min", "std": "bezahlte Std.", "brutto": "brutto", "bruttoHeute": "brutto heute", "leer": "Frei – kein Dienst eingetragen.", "gespeichert": "✓ gespeichert", "schichtGesp": "✓ {x} gespeichert", "schichtName": "{k}-Schicht", "geloescht": "✓ Frei eingetragen", "vortag": "Vortag", "folgetag": "Folgetag", "weniger": "weniger", "mehr": "mehr", "speichern": "Speichern", "gespeichertKnopf": "✓ Gespeichert", "speichertKnopf": "Speichert …", "verwerfen": "Änderungen verwerfen", "ungespeichert": "Erst speichern oder verwerfen.", "berechnet": "Wird berechnet …", "laden": "Lädt …", "monat": "📅 Monatsübersicht", "zurTag": "‹ Zurück zum Tag", "bruttoM": "brutto", "netto": "Netto (Schätzung)", "arbeitstage": "Arbeitstage", "urlaubT": "Urlaub", "krankT": "Krank", "stdGesamt": "Stunden insgesamt", "stdAus": "davon ausbezahlt", "zNacht": "Nachtzuschlag", "zSonntag": "Sonntagszuschlag", "zFeiertag": "Feiertagszuschlag", "zUK": "Zuschlag Urlaub/Krank", "azkMonat": "AZK diesen Monat", "azkGesamt": "AZK gesamt", "std_": "Std.", "einst": "⚙ Verbindung ändern", "keineVerb": "Keine Verbindung zur Tabelle.", "nichtGespVerb": "Nicht gespeichert – keine Verbindung. Bitte nochmal „Speichern“.", "serverFehler": "Server antwortet nicht", "eTitel": "Einrichtung", "eText": "Einmalig: In deiner Tabelle oben im Menü „📱 Handy-App“ → „② App verbinden“ wählen und den QR-Code mit dem Handy scannen. Oder Link und Schlüssel hier einfügen.", "eUrl": "App-Link (endet auf /exec)", "eK": "Schlüssel", "eKPh": "langer Code", "eOk": "Speichern und verbinden", "eWarn": "Den Schlüssel nicht weitergeben – wer ihn hat, kann in deine Tabelle eintragen.", "eUrlFehler": "Der Link muss mit https://script.google.com beginnen und auf /exec enden.", "eKFehler": "Der Schlüssel ist zu kurz."};
 // ---- /TEXTE ----
 var NAMEN = { U: L.U, K: L.K };
 var RTL = document.documentElement.dir === 'rtl';
