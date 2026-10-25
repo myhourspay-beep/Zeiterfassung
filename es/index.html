@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<title>Registro horario</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1F4E78">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Registro horario">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="../icon-180.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<style>
+  :root {
+    --bg: #F3F5F8; --card: #FFFFFF; --text: #1B2430; --muted: #6B7685; --line: #E2E6EC; --feld: #F3F5F8;
+    --accent: #1F4E78; --red: #C00000; --ok: #1E7B3A;
+    --F: #2E75B6; --S: #D9822B; --N: #5B4BB7; --U: #2E9E5B; --K: #D64545;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0F141A; --card: #19212B; --text: #E8EDF3; --muted: #93A0B0; --line: #2A3542; --feld: #0F141A;
+            --accent: #7FB2E5; --red: #FF7A7A; --ok: #5FD38A; }
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
+  main { max-width: 480px; margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 16px 40px; }
+
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .pfeil { width: 44px; height: 44px; border-radius: 22px; border: 1px solid var(--line); background: var(--card);
+    color: var(--text); font-size: 22px; cursor: pointer; }
+  .pfeil:disabled { opacity: .3; }
+  .kopf { text-align: center; flex: 1; }
+  .kopf .wtag { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .kopf .datum { font-size: 26px; font-weight: 700; }
+  .rot { color: var(--red) !important; }
+  .zuheute { display: block; margin: 6px auto 0; background: none; border: 0; color: var(--accent);
+    font-size: 15px; font-weight: 600; cursor: pointer; padding: 6px 10px; }
+  .feiertag { margin: 10px auto 0; width: fit-content; padding: 4px 12px; border-radius: 999px;
+    background: #F4B183; color: #5A2600; font-size: 14px; font-weight: 600; }
+
+  .karte { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-top: 16px; }
+  .titel { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 10px; }
+
+  .schichten { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .sk { border: 2px solid transparent; border-radius: 16px; padding: 14px 6px; min-height: 84px; cursor: pointer;
+    color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    transition: transform .08s; }
+  .sk:active { transform: scale(.96); }
+  .sk b { font-size: 30px; line-height: 1; }
+  .sk span { font-size: 12px; opacity: .92; }
+  .sk.F { background: var(--F); } .sk.S { background: var(--S); } .sk.N { background: var(--N); }
+  .sk.U { background: var(--U); } .sk.K { background: var(--K); }
+  .sk.leer { background: transparent; color: var(--muted); border: 2px dashed var(--line); }
+  .sk.leer.aktiv { color: var(--text); border: 2px solid var(--text); box-shadow: none; }
+  .sk { position: relative; }
+  .sk.aktiv { border-color: var(--text); box-shadow: 0 0 0 3px var(--card) inset, 0 4px 14px rgba(0,0,0,.18); transform: scale(1.03); }
+  .sk.aktiv::after { content: "✓"; position: absolute; top: 6px; right: 8px; width: 22px; height: 22px; border-radius: 11px;
+    background: #fff; color: #1B2430; font-size: 14px; font-weight: 800; line-height: 22px; text-align: center; }
+  .sk.leer.aktiv::after { background: var(--text); color: var(--card); }
+
+  .zeile { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; }
+  .zeile + .zeile { border-top: 1px solid var(--line); }
+  .zeile .name { font-weight: 600; }
+  .zeile .name small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+  .stepper { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .stepper button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--feld);
+    color: var(--text); font-size: 22px; cursor: pointer; }
+  .stepper input { width: 64px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--feld);
+    color: var(--text); font-size: 18px; font-weight: 700; text-align: center; }
+  .stepper .einh { font-size: 13px; color: var(--muted); width: 26px; }
+  .zeile.an input { border-color: var(--ok); color: var(--ok); }
+
+  .ergebnis { display: flex; justify-content: space-around; text-align: center; }
+  .ergebnis .wert { font-size: 24px; font-weight: 700; }
+  .ergebnis .lbl { font-size: 13px; color: var(--muted); }
+  .hinweis { text-align: center; color: var(--muted); font-size: 14px; margin: 8px 0 0; }
+
+  .meldung { position: fixed; left: 50%; top: max(14px, env(safe-area-inset-top)); transform: translateX(-50%) translateY(-20px); z-index: 20;
+    background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 15px;
+    opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; white-space: nowrap; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
+  .meldung.zeigen { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .meldung.fehler { background: var(--red); color: #fff; white-space: normal; text-align: center; width: max-content; max-width: 90vw; }
+  .balken { position: fixed; top: 0; left: 0; right: 0; height: 3px; overflow: hidden; z-index: 10; opacity: 0; transition: opacity .2s; }
+  .balken.an { opacity: 1; }
+  .balken::before { content: ""; position: absolute; top: 0; bottom: 0; width: 35%; background: var(--accent);
+    animation: lauf 1.1s ease-in-out infinite; }
+  @keyframes lauf { 0% { left: -35%; } 100% { left: 100%; } }
+  .warte { color: var(--muted); font-size: 15px; text-align: center; margin: 0; }
+  .leiste { position: sticky; bottom: 0; padding: 12px 0 max(12px, env(safe-area-inset-bottom)); background: var(--bg); margin-top: 8px; }
+  .speichern { width: 100%; padding: 16px; border-radius: 16px; border: 0; font-size: 18px; font-weight: 800; cursor: pointer;
+    background: var(--line); color: var(--muted); transition: background .2s, transform .08s; }
+  .speichern.bereit { background: #1E7B3A; color: #fff; box-shadow: 0 6px 18px rgba(30,123,58,.35); }
+  .speichern.bereit:active { transform: scale(.98); }
+  .speichern.laeuft { background: #1E7B3A; color: #fff; opacity: .8; }
+  .verwerfen[hidden] { display: none; }
+  .verwerfen { display: block; margin: 8px auto 0; background: none; border: 0; color: var(--muted); font-size: 14px; cursor: pointer; padding: 6px; }
+  .monatknopf { width: 100%; margin-top: 16px; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--card);
+    color: var(--accent); font-size: 17px; font-weight: 700; cursor: pointer; }
+  .summen { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .summen div { background: var(--feld); border-radius: 12px; padding: 10px 12px; }
+  .summen b { display: block; font-size: 20px; } .summen span { font-size: 12px; color: var(--muted); }
+  .summen .gross { grid-column: 1 / 3; background: #E2EFDA; } .summen .gross b { font-size: 26px; color: #1E5631; }
+  @media (prefers-color-scheme: dark) { .summen .gross { background: #1E3A28; } .summen .gross b { color: #8FE0A8; } }
+  .posten { display: grid; grid-template-columns: 1fr auto; margin: 12px 0 0; }
+  .posten dt, .posten dd { margin: 0; padding: 8px 2px; border-top: 1px solid var(--line); }
+  .posten dt { color: var(--muted); } .posten dd { font-weight: 700; text-align: right; }
+  .zusatz { margin: 10px 0 0; font-size: 14px; color: var(--muted); text-align: center; }
+  .liste { margin: 0; padding: 0; list-style: none; }
+  .liste li { display: grid; grid-template-columns: 74px 44px 1fr auto; align-items: center; gap: 8px; padding: 9px 4px;
+    border-top: 1px solid var(--line); cursor: pointer; }
+  .liste li:first-child { border-top: 0; }
+  .liste li.heute { background: #FFF2CC; border-radius: 10px; }
+  @media (prefers-color-scheme: dark) { .liste li.heute { background: #3A3320; } }
+  .liste .dt { font-weight: 600; } .liste .dt small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+  .liste .rot .dt, .liste li.rot .dt { color: var(--red); }
+  .badge { display: inline-block; min-width: 34px; text-align: center; padding: 4px 0; border-radius: 8px; color: #fff; font-weight: 800; }
+  .badge.F { background: var(--F); } .badge.S { background: var(--S); } .badge.N { background: var(--N); }
+  .badge.U { background: var(--U); } .badge.K { background: var(--K); } .badge.frei { color: var(--muted); background: none; }
+  .liste .std { color: var(--muted); font-size: 14px; } .liste .eur { font-weight: 700; text-align: right; }
+  .geaendert { display: inline-block; margin-left: 6px; width: 8px; height: 8px; border-radius: 4px; background: #D9822B; vertical-align: middle; }
+  .zahnrad { display: block; margin: 22px auto 0; background: none; border: 0; color: var(--muted); font-size: 14px; cursor: pointer; padding: 8px; }
+  .setup h1 { font-size: 24px; margin: 8px 0 6px; } .setup p { color: var(--muted); margin: 0 0 14px; }
+  .setup label { display: block; font-weight: 600; margin: 14px 0 6px; }
+  .setup textarea { width: 100%; min-height: 76px; border-radius: 12px; border: 1px solid var(--line); background: var(--feld);
+    color: var(--text); font: 14px/1.35 ui-monospace, Menlo, Consolas, monospace; padding: 10px; word-break: break-all; }
+  .knopf { width: 100%; margin-top: 18px; padding: 15px; border-radius: 14px; border: 0; font-size: 17px; font-weight: 700;
+    background: var(--accent); color: #fff; cursor: pointer; }
+  @media (prefers-color-scheme: dark) { .knopf { color: #0F141A; } }
+  .klein { font-size: 13px; color: var(--muted); margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="balken" id="balken"></div>
+<main id="app"><p class="hinweis" style="margin-top:40vh">…</p></main>
+<div class="meldung" id="meldung"></div>
+
+<script>
+// ---- TEXTE (Sprache) ----
+var L = {"locale": "es-ES", "heute": "Hoy", "gestern": "Ayer", "morgen": "Mañana", "zurueckHeute": "↺ Volver a hoy", "schicht": "Turno", "U": "Vacaciones", "K": "Baja", "leeren": "Libre", "zeiten": "Tiempos", "ann": "Llegar antes", "annU": "Recepción del relevo", "abg": "Quedarse más", "abgU": "Entrega del relevo", "versp": "Retraso", "verspU": "llegó tarde", "ueber": "Horas extra", "ueberU": "trabajo adicional", "min": "min", "std": "horas pagadas", "brutto": "bruto", "bruttoHeute": "bruto hoy", "leer": "Libre – sin turno.", "gespeichert": "✓ guardado", "schichtGesp": "✓ {x} guardado", "schichtName": "Turno {k}", "geloescht": "✓ Libre guardado", "vortag": "Día anterior", "folgetag": "Día siguiente", "weniger": "menos", "mehr": "más", "speichern": "Guardar", "gespeichertKnopf": "✓ Guardado", "speichertKnopf": "Guardando …", "verwerfen": "Descartar cambios", "ungespeichert": "Primero guarda o descarta.", "berechnet": "Calculando …", "laden": "Cargando …", "monat": "📅 Resumen del mes", "zurTag": "‹ Volver al día", "bruttoM": "bruto", "netto": "Neto (estimado)", "arbeitstage": "Días trabajados", "urlaubT": "Vacaciones", "krankT": "Baja", "stdGesamt": "Horas totales", "stdAus": "de ellas pagadas", "zNacht": "Plus nocturno", "zSonntag": "Plus dominical", "zFeiertag": "Plus festivo", "zUK": "Plus vacaciones/baja", "azkMonat": "Cuenta de horas este mes", "azkGesamt": "Cuenta de horas total", "std_": "h", "einst": "⚙ Cambiar conexión", "keineVerb": "Sin conexión con la hoja.", "nichtGespVerb": "No guardado – sin conexión. Pulsa «Guardar» otra vez.", "serverFehler": "El servidor no responde", "eTitel": "Configuración", "eText": "Una sola vez: en tu hoja, menú «📱 App móvil» → «② Conectar app» y escanea el código QR con el móvil. O pega aquí el enlace y la clave.", "eUrl": "Enlace de la app (termina en /exec)", "eK": "Clave", "eKPh": "código largo", "eOk": "Guardar y conectar", "eWarn": "No compartas la clave: quien la tenga puede escribir en tu hoja.", "eUrlFehler": "El enlace debe empezar por https://script.google.com y terminar en /exec.", "eKFehler": "La clave es demasiado corta."};
+// ---- /TEXTE ----
+var NAMEN = { U: L.U, K: L.K };
+var RTL = document.documentElement.dir === 'rtl';
+var ARBEIT = ['F', 'S', 'N'];
+var SCHRITT = 5;                          // Minuten pro Tipp auf − / +
+var STANDARD = { ann: 15, abg: 15 };      // Teamleiter: Vorschlag für neue Tage
+var FENSTER_VOR = 3, FENSTER_N = 11;      // so viele Tage werden auf einmal geholt
+
+var basis = null;          // heute, erster, letzter, tl, schichten
+var tage = {};             // iso -> gespeicherter Stand aus der Tabelle
+var aktuell = null;        // angezeigter Tag
+var entwurf = null;        // Auswahl auf dem Bildschirm (noch nicht gespeichert)
+var speichertGerade = false, offen = 0, geholt = {};
+var ansicht = 'tag', monatYm = null, monate = {};   // Monatsübersicht
+
+// ---------- Hilfen ----------
+function wtag(d) { return d.toLocaleDateString(L.locale, { weekday: 'long' }); }
+function datumText(d) { return d.toLocaleDateString(L.locale, { day: 'numeric', month: 'long', year: 'numeric' }); }
+function datumObj(iso) { var p = iso.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function isoVon(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function plusTage(iso, n) { var d = datumObj(iso); d.setDate(d.getDate() + n); return isoVon(d); }
+function heuteLokal() { return isoVon(new Date()); }
+function zahl(n, st) { return n.toLocaleString(L.locale, { minimumFractionDigits: st, maximumFractionDigits: st }); }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function n0(v) { var n = Number(v); return isNaN(n) ? 0 : n; }
+function melde(text, fehler) {
+  var m = document.getElementById('meldung');
+  m.textContent = text; m.className = 'meldung zeigen' + (fehler ? ' fehler' : '');
+  clearTimeout(melde.t); melde.t = setTimeout(function () { m.className = 'meldung' + (fehler ? ' fehler' : ''); }, fehler ? 5000 : 1600);
+}
+function balken(d) { offen = Math.max(0, offen + d); document.getElementById('balken').className = 'balken' + (offen ? ' an' : ''); }
+
+// ---------- Speicher auf dem Gerät (damit die App sofort etwas zeigt) ----------
+var KONF_KEY = 'zeiterfassung_konfig', CACHE_KEY = 'zeiterfassung_cache';
+function konfig() { try { return JSON.parse(localStorage.getItem(KONF_KEY) || 'null'); } catch (e) { return null; } }
+function konfigSpeichern(k) { try { localStorage.setItem(KONF_KEY, JSON.stringify(k)); localStorage.removeItem(CACHE_KEY); } catch (e) {} }
+function cacheLaden() { try { var c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); if (c) { basis = c.basis; tage = c.tage || {}; } } catch (e) {} }
+function cacheSichern() { try { localStorage.setItem(CACHE_KEY, JSON.stringify({ basis: basis, tage: tage })); } catch (e) {} }
+
+// ---------- Verbindung zur Tabelle ----------
+function api(q) {
+  var k = konfig(); if (!k) return Promise.reject(new Error('keine Einrichtung'));
+  q.k = k.k; q.t = Date.now();
+  balken(1);
+  return fetch(k.url + '?' + new URLSearchParams(q).toString(), { redirect: 'follow', cache: 'no-store' })
+    .then(function (r) { if (!r.ok) throw new Error(L.serverFehler + ' (' + r.status + ')'); return r.json(); })
+    .then(function (r) {
+      balken(-1);
+      if (r && r.zugriff === false) { melde(r.fehler, true); einrichtung(k); throw new Error('stumm'); }
+      return r;
+    }, function (e) { balken(-1); throw e; });
+}
+function basisAus(r) { basis = { heute: r.heute, erster: r.erster, letzter: r.letzter, tl: r.tl, schichten: r.schichten }; }
+function tagAus(r) { return { iso: r.iso, feiertag: r.feiertag, schicht: r.schicht, versp: r.versp, ueber: r.ueber, ann: r.ann, abg: r.abg, std: r.std, eur: r.eur }; }
+
+// mehrere Tage rund um „mitte“ holen
+function holeFenster(mitte) {
+  var von = plusTage(mitte, -FENSTER_VOR);
+  if (geholt[von]) return geholt[von];
+  geholt[von] = api({ api: 'tage', von: von, n: FENSTER_N }).then(function (r) {
+    basisAus(r); (r.tage || []).forEach(function (t) { tage[t.iso] = t; }); cacheSichern();
+    setTimeout(function () { delete geholt[von]; }, 60000);
+    return r;
+  }, function (e) { delete geholt[von]; if (e.message !== 'stumm') melde(L.keineVerb + ' ' + (e.message || ''), true); throw e; });
+  return geholt[von];
+}
+
+// ---------- Entwurf = was auf dem Bildschirm ausgewählt ist ----------
+function entwurfAus(t) {
+  var arbeit = ARBEIT.indexOf(t.schicht) >= 0, tl = basis && basis.tl;
+  return {
+    schicht: t.schicht || '',
+    versp: Math.round(n0(t.versp)), ueber: Math.round(n0(t.ueber) * 60),
+    ann: tl ? (arbeit ? Math.round(n0(t.ann)) : STANDARD.ann) : 0,
+    abg: tl ? (arbeit ? Math.round(n0(t.abg)) : STANDARD.abg) : 0
+  };
+}
+function geaendert() {
+  if (!entwurf || !tage[aktuell]) return false;
+  var g = entwurfAus(tage[aktuell]), e = entwurf, arbeit = ARBEIT.indexOf(e.schicht) >= 0;
+  if (e.schicht !== g.schicht) return true;
+  if (!arbeit) return false;                                   // bei U/K/Frei zählen die Minuten nicht
+  return e.versp !== g.versp || e.ueber !== g.ueber || (basis.tl && (e.ann !== g.ann || e.abg !== g.abg));
+}
+
+// ---------- Anzeige ----------
+function zeige() {
+  if (ansicht === 'monat') { zeigeMonat(); return; }
+  if (!basis) { document.getElementById('app').innerHTML = '<p class="warte" style="margin-top:40vh">' + L.laden + '</p>'; return; }
+  var t = tage[aktuell], heute = basis.heute || heuteLokal();
+  if (t && !entwurf) entwurf = entwurfAus(t);
+  var e = entwurf || { schicht: '', versp: 0, ueber: 0, ann: 0, abg: 0 };
+  var d = datumObj(aktuell), feiertag = t && t.feiertag, rot = d.getDay() === 0 || !!feiertag, istHeute = aktuell === heute;
+  var rel = istHeute ? L.heute + ' · ' + wtag(d) : (aktuell === plusTage(heute, -1) ? L.gestern + ' · ' + wtag(d)
+          : (aktuell === plusTage(heute, 1) ? L.morgen + ' · ' + wtag(d) : wtag(d)));
+  var h = '<div class="nav">';
+  h += '<button class="pfeil" id="zurueck" aria-label="' + L.vortag + '"' + (aktuell <= basis.erster ? ' disabled' : '') + '>' + (RTL ? '›' : '‹') + '</button>';
+  h += '<div class="kopf"><div class="wtag' + (rot ? ' rot' : '') + '">' + rel + '</div>';
+  h += '<div class="datum' + (rot ? ' rot' : '') + '">' + datumText(d) + '</div></div>';
+  h += '<button class="pfeil" id="vor" aria-label="' + L.folgetag + '"' + (aktuell >= basis.letzter ? ' disabled' : '') + '>' + (RTL ? '‹' : '›') + '</button></div>';
+  if (!istHeute) h += '<button class="zuheute" id="zuheute">' + L.zurueckHeute + '</button>';
+  if (feiertag) h += '<div class="feiertag">🎉 ' + esc(feiertag) + '</div>';
+
+  if (!t) {                                                       // Tag noch nicht geladen
+    h += '<section class="karte"><p class="warte">' + L.laden + '</p></section>';
+    document.getElementById('app').innerHTML = h; verknuepfeNav(); return;
+  }
+  h += '<section class="karte"><p class="titel">' + L.schicht + '</p><div class="schichten">';
+  basis.schichten.forEach(function (s) {
+    h += '<button class="sk ' + s.k + (e.schicht === s.k ? ' aktiv' : '') + '" data-k="' + s.k + '"><b>' + s.k + '</b><span dir="ltr">' + esc(s.von) + '–' + esc(s.bis) + '</span></button>';
+  });
+  ['U', 'K'].forEach(function (k) {
+    h += '<button class="sk ' + k + (e.schicht === k ? ' aktiv' : '') + '" data-k="' + k + '"><b>' + k + '</b><span>' + NAMEN[k] + '</span></button>';
+  });
+  h += '<button class="sk leer' + (e.schicht ? '' : ' aktiv') + '" data-k=""><b>–</b><span>' + L.leeren + '</span></button>';
+  h += '</div></section>';
+
+  if (ARBEIT.indexOf(e.schicht) >= 0) {
+    h += '<section class="karte"><p class="titel">' + L.zeiten + '</p>';
+    if (basis.tl) { h += zeile('ann', L.ann, L.annU); h += zeile('abg', L.abg, L.abgU); }
+    h += zeile('versp', L.versp, L.verspU);
+    h += zeile('ueber', L.ueber, L.ueberU);
+    h += '</section>';
+  }
+  h += '<section class="karte" id="ergebnis">' + ergebnisHtml(t, istHeute) + '</section>';
+  h += '<button class="monatknopf" id="monatknopf">' + L.monat + '</button>';
+  h += '<div class="leiste"><button class="speichern" id="speichern"></button><button class="verwerfen" id="verwerfen" hidden>' + L.verwerfen + '</button></div>';
+  h += '<button class="zahnrad" id="einst">' + L.einst + '</button>';
+  document.getElementById('app').innerHTML = h;
+  verknuepfeNav();
+  document.querySelectorAll('.sk').forEach(function (b) { b.onclick = function () { waehle(b.getAttribute('data-k')); }; });
+  ['ann', 'abg', 'versp', 'ueber'].forEach(function (id) {
+    var feld = document.getElementById('w_' + id); if (!feld) return;
+    document.getElementById('m_' + id).onclick = function () { aendere(id, entwurf[id] - SCHRITT); };
+    document.getElementById('p_' + id).onclick = function () { aendere(id, entwurf[id] + SCHRITT); };
+    feld.oninput = function () { aendere(id, Math.round(n0(feld.value.replace(',', '.'))), true); };
+    feld.onfocus = function () { feld.select(); };
+  });
+  document.getElementById('speichern').onclick = speichern;
+  document.getElementById('monatknopf').onclick = function () {
+    if (geaendert()) { melde(L.ungespeichert, true); return; }
+    oeffneMonat(aktuell.slice(0, 7));
+  };
+  document.getElementById('verwerfen').onclick = function () { entwurf = entwurfAus(tage[aktuell]); zeige(); };
+  document.getElementById('einst').onclick = function () { einrichtung(); };
+  knopf();
+}
+// ---------- Monatsübersicht ----------
+function oeffneMonat(ym) {
+  ansicht = 'monat'; monatYm = ym; zeigeMonat(); window.scrollTo(0, 0);
+  api({ api: 'monat', ym: ym }).then(function (r) {
+    basisAus(r); (r.tage || []).forEach(function (t) { tage[t.iso] = t; });
+    monate[ym] = r.summe || {}; cacheSichern();
+    if (ansicht === 'monat' && monatYm === ym) zeigeMonat();
+  }, function (e) { if (e.message !== 'stumm') melde(L.keineVerb + ' ' + (e.message || ''), true); });
+}
+function ymPlus(ym, n) { var d = new Date(+ym.slice(0, 4), +ym.slice(5, 7) - 1 + n, 1); return isoVon(d).slice(0, 7); }
+function zeigeMonat() {
+  var ym = monatYm, heute = basis.heute || heuteLokal();
+  var erster = new Date(+ym.slice(0, 4), +ym.slice(5, 7) - 1, 1);
+  var titel = erster.toLocaleDateString(L.locale, { month: 'long', year: 'numeric' });
+  var h = '<div class="nav"><button class="pfeil" id="m_zur"' + (ym <= basis.erster.slice(0, 7) ? ' disabled' : '') + '>' + (RTL ? '›' : '‹') + '</button>';
+  h += '<div class="kopf"><div class="wtag">' + L.monat.replace(/^\S+\s/, '') + '</div><div class="datum">' + titel + '</div></div>';
+  h += '<button class="pfeil" id="m_vor"' + (ym >= basis.letzter.slice(0, 7) ? ' disabled' : '') + '>' + (RTL ? '‹' : '›') + '</button></div>';
+  h += '<button class="zuheute" id="m_tag">' + L.zurTag + '</button>';
+  var su = monate[ym];
+  h += '<section class="karte">';
+  if (su && su.std !== undefined) {
+    var eur = function (x) { return zahl(x || 0, 2) + ' €'; }, std = function (x) { return zahl(x || 0, 2) + ' ' + L.std_; };
+    h += '<div class="summen">';
+    if (su.netto !== null && su.netto !== undefined) h += '<div class="gross"><b>' + eur(su.netto) + '</b><span>' + L.netto + '</span></div>';
+    h += '<div><b>' + eur(su.brutto) + '</b><span>' + L.bruttoM + '</span></div>';
+    h += '<div><b>' + zahl(su.std, 2) + '</b><span>' + L.stdGesamt + '</span></div></div>';
+    var zeilen = [[L.stdAus, std(su.std - (su.azk || 0))], [L.zNacht, eur(su.nacht)], [L.zSonntag, eur(su.sonntag)]];
+    if (su.feiertag) zeilen.push([L.zFeiertag, eur(su.feiertag)]);
+    zeilen.push([L.zUK, eur(su.uk)], [L.azkMonat, std(su.azk)], [L.azkGesamt, std(su.saldo)]);
+    h += '<dl class="posten">' + zeilen.map(function (z) { return '<dt>' + z[0] + '</dt><dd>' + z[1] + '</dd>'; }).join('') + '</dl>';
+    var z = [L.arbeitstage + ': ' + su.tage];
+    if (su.urlaub) z.push(L.urlaubT + ': ' + su.urlaub);
+    if (su.krank) z.push(L.krankT + ': ' + su.krank);
+    h += '<p class="zusatz">' + z.join(' · ') + '</p>';
+  } else {
+    h += '<p class="warte">' + L.laden + '</p>';
+  }
+  h += '</section><section class="karte"><ul class="liste">';
+  var n = new Date(erster.getFullYear(), erster.getMonth() + 1, 0).getDate();
+  for (var i = 1; i <= n; i++) {
+    var iso = ym + '-' + ('0' + i).slice(-2), d = datumObj(iso), t = tage[iso];
+    var rot = d.getDay() === 0 || (t && t.feiertag);
+    var badge = t && t.schicht ? '<span class="badge ' + t.schicht + '">' + t.schicht + '</span>' : '<span class="badge frei">' + (t ? '–' : '…') + '</span>';
+    h += '<li data-iso="' + iso + '" class="' + (iso === heute ? 'heute ' : '') + (rot ? 'rot' : '') + '">';
+    h += '<span class="dt">' + ('0' + i).slice(-2) + '.' + ym.slice(5, 7) + '.<small>' + d.toLocaleDateString(L.locale, { weekday: 'short' }) + '</small></span>' + badge;
+    h += '<span class="std">' + (t && t.std ? zahl(t.std, 2) + ' ' + L.std_ : (t && t.feiertag ? esc(t.feiertag) : '')) + '</span>';
+    h += '<span class="eur">' + (t && t.eur ? zahl(t.eur, 2) + ' €' : '') + '</span></li>';
+  }
+  h += '</ul></section>';
+  document.getElementById('app').innerHTML = h;
+  document.getElementById('m_zur').onclick = function () { oeffneMonat(ymPlus(ym, -1)); };
+  document.getElementById('m_vor').onclick = function () { oeffneMonat(ymPlus(ym, 1)); };
+  document.getElementById('m_tag').onclick = function () { ansicht = 'tag'; zeige(); };
+  document.querySelectorAll('.liste li').forEach(function (li) {
+    li.onclick = function () { ansicht = 'tag'; gehe(li.getAttribute('data-iso')); window.scrollTo(0, 0); };
+  });
+}
+
+function verknuepfeNav() {
+  var z = document.getElementById('zurueck'), v = document.getElementById('vor'), hh = document.getElementById('zuheute');
+  if (z) z.onclick = function () { gehe(plusTage(aktuell, -1)); };
+  if (v) v.onclick = function () { gehe(plusTage(aktuell, 1)); };
+  if (hh) hh.onclick = function () { gehe(basis.heute || heuteLokal()); };
+}
+function zeile(id, name, unter) {
+  return '<div class="zeile' + (entwurf[id] > 0 ? ' an' : '') + '" id="z_' + id + '"><div class="name">' + name + '<small>' + unter + '</small></div>' +
+    '<div class="stepper"><button id="m_' + id + '" aria-label="' + L.weniger + '">−</button>' +
+    '<input id="w_' + id + '" inputmode="numeric" value="' + entwurf[id] + '"><button id="p_' + id + '" aria-label="' + L.mehr + '">+</button>' +
+    '<span class="einh">' + L.min + '</span></div></div>';
+}
+function ergebnisHtml(t, istHeute) {
+  if (speichertGerade) return '<p class="warte">' + L.berechnet + '</p>';
+  if (t.schicht && t.std !== null) {
+    return '<div class="ergebnis"><div><div class="wert">' + zahl(t.std, 2) + '</div><div class="lbl">' + L.std + '</div></div>' +
+      '<div><div class="wert">' + zahl(t.eur, 2) + ' €</div><div class="lbl">' + (istHeute ? L.bruttoHeute : L.brutto) + '</div></div></div>';
+  }
+  return '<p class="hinweis" style="margin:0">' + L.leer + '</p>';
+}
+function knopf() {
+  var b = document.getElementById('speichern'), v = document.getElementById('verwerfen'); if (!b) return;
+  var g = geaendert();
+  b.className = 'speichern' + (speichertGerade ? ' laeuft' : (g ? ' bereit' : ''));
+  b.textContent = speichertGerade ? L.speichertKnopf : (g ? L.speichern : L.gespeichertKnopf);
+  b.disabled = speichertGerade || !g;
+  v.hidden = !g || speichertGerade;
+}
+
+// ---------- Eingaben ----------
+function waehle(k) {
+  if (speichertGerade) return;
+  var warArbeit = ARBEIT.indexOf(entwurf.schicht) >= 0;
+  entwurf.schicht = k;
+  if (basis.tl && ARBEIT.indexOf(k) >= 0 && !warArbeit) { entwurf.ann = entwurf.ann || STANDARD.ann; entwurf.abg = entwurf.abg || STANDARD.abg; }
+  zeige();
+}
+function aendere(id, wert, getippt) {
+  entwurf[id] = Math.max(0, Math.min(id === 'ueber' ? 720 : 240, wert || 0));
+  if (!getippt) document.getElementById('w_' + id).value = entwurf[id];
+  document.getElementById('z_' + id).className = 'zeile' + (entwurf[id] > 0 ? ' an' : '');
+  knopf();
+}
+function gehe(iso) {
+  if (geaendert()) { melde(L.ungespeichert, true); var b = document.getElementById('speichern'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+  aktuell = iso; entwurf = null; zeige();
+  if (!tage[iso] || !tage[plusTage(iso, -2)] || !tage[plusTage(iso, 2)]) holeFenster(iso).then(function () { if (aktuell === iso) { entwurf = null; zeige(); } }, function () {});
+}
+
+function speichern() {
+  if (speichertGerade || !geaendert()) return;
+  var e = entwurf, iso = aktuell, arbeit = ARBEIT.indexOf(e.schicht) >= 0;
+  var leer = function (v) { return v > 0 ? v : ''; };
+  speichertGerade = true; knopf(); document.getElementById('ergebnis').innerHTML = ergebnisHtml(tage[iso], false);
+  api({ api: 'speichern', iso: iso, s: e.schicht,
+        v: arbeit ? leer(e.versp) : '', u: arbeit && e.ueber > 0 ? Math.round(e.ueber / 60 * 10000) / 10000 : '',
+        a: arbeit && basis.tl ? leer(e.ann) : '', b: arbeit && basis.tl ? leer(e.abg) : '' })
+    .then(function (r) {
+      speichertGerade = false;
+      if (r.fehler) { melde(r.fehler, true); zeige(); return; }
+      basisAus(r); tage[iso] = tagAus(r); delete monate[iso.slice(0, 7)]; cacheSichern();
+      if (aktuell === iso) { entwurf = entwurfAus(tage[iso]); zeige(); }
+      melde(e.schicht ? L.schichtGesp.replace('{x}', NAMEN[e.schicht] || L.schichtName.replace('{k}', e.schicht)) : L.geloescht);
+    }, function (err) {
+      speichertGerade = false; zeige();
+      if (err.message !== 'stumm') melde(L.nichtGespVerb, true);
+    });
+}
+
+// ---------- Einrichtung (einmal: Link + Schlüssel) ----------
+function einrichtung(alt) {
+  alt = alt || konfig() || {};
+  var h = '<div class="setup"><h1>' + L.eTitel + '</h1><p>' + L.eText + '</p>';
+  h += '<label for="e_url">' + L.eUrl + '</label><textarea id="e_url" placeholder="https://script.google.com/macros/s/…/exec">' + esc(alt.url || '') + '</textarea>';
+  h += '<label for="e_k">' + L.eK + '</label><textarea id="e_k" placeholder="' + L.eKPh + '">' + esc(alt.k || '') + '</textarea>';
+  h += '<button class="knopf" id="e_ok">' + L.eOk + '</button>';
+  h += '<p class="klein">' + L.eWarn + '</p></div>';
+  document.getElementById('app').innerHTML = h;
+  document.getElementById('e_ok').onclick = function () {
+    var url = document.getElementById('e_url').value.trim().split(/\s+/)[0].replace(/\?.*$/, '');
+    var k = document.getElementById('e_k').value.replace(/\s+/g, '');
+    if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) { melde(L.eUrlFehler, true); return; }
+    if (k.length < 20) { melde(L.eKFehler, true); return; }
+    konfigSpeichern({ url: url, k: k }); start();
+  };
+}
+
+// ---------- Start ----------
+function start() {
+  basis = null; tage = {}; entwurf = null; geholt = {};
+  cacheLaden();
+  aktuell = heuteLokal();
+  zeige();                                                    // sofort: letzter bekannter Stand
+  holeFenster(aktuell).then(function () {
+    if (basis.heute && basis.heute !== aktuell && !geaendert()) aktuell = basis.heute;
+    if (!geaendert()) { entwurf = null; zeige(); }
+  }, function () {});
+}
+function hashEinrichtung() {
+  if (location.hash.length > 1) {
+    var p = new URLSearchParams(location.hash.slice(1));
+    var neu = p.get('url') && p.get('k');
+    if (neu) konfigSpeichern({ url: p.get('url'), k: p.get('k') });
+    history.replaceState(null, '', location.pathname);
+    return neu;
+  }
+}
+hashEinrichtung();
+window.addEventListener('hashchange', function () { if (hashEinrichtung()) start(); });
+// beim Zurückkehren in die App: neuer Tag nach Mitternacht, frische Daten
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'visible' && konfig() && !geaendert() && !speichertGerade) {
+    if (aktuell !== heuteLokal() && aktuell === (basis && basis.heute)) aktuell = heuteLokal();
+    if (ansicht === 'monat') { oeffneMonat(monatYm); return; }
+    geholt = {}; holeFenster(aktuell).then(function () { if (!geaendert()) { entwurf = null; zeige(); } }, function () {});
+  }
+});
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+if (konfig()) start(); else einrichtung();
+</script>
+</body>
+</html>
